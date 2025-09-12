@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import data from "../../Data/ProductsData.jsx";
 import StarRate from "../../Constant/Stars.jsx";
 import { useCart } from "../../Constant/AddToCart.jsx";
+import { FaHeart } from "react-icons/fa";
 
 export default function Products() {
   const { addToCart } = useCart();
@@ -25,7 +26,7 @@ export default function Products() {
     <section className="w-full min-h-screen bg-gradient-to-r from-cyan-400 to-blue-600 py-12 px-4 md:px-10">
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center mb-8">
-        <h3 className="text-xl md:text-2xl font-semibold text-white underline uppercase mb-4 md:mb-0">
+        <h3 className="text-xl md:text-2xl font-bold text-white underline uppercase mb-4 md:mb-0">
           Trending This Week:
         </h3>
 
@@ -38,7 +39,7 @@ export default function Products() {
               className={`px-4 py-2 rounded-full font-bold text-sm md:text-base transition 
                 ${
                   activeCategory === category
-                    ? "bg-purple-500 text-white"
+                    ? "bg-orange-500 text-white"
                     : "bg-transparent text-white hover:bg-cyan-100 hover:text-blue-700"
                 }`}
             >
@@ -49,7 +50,7 @@ export default function Products() {
       </div>
 
       {/* Product Cards */}
-      <div className="flex flex-wrap justify-center gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
         {categoryFiltered.length === 0 ? (
           <p className="text-center text-lg text-white">No items found.</p>
         ) : (
@@ -57,33 +58,44 @@ export default function Products() {
             ({ id, title, image, price, rating, reviewCount }) => (
               <div
                 key={id}
-                className="group w-[90%] sm:w-[45%] md:w-[30%] lg:w-64 h-auto rounded-xl bg-white shadow-md flex flex-col justify-between transition transform hover:scale-105"
+                className="relative group w-full h-full rounded-xl bg-white shadow-md flex flex-col transition transform hover:scale-105"
               >
+                {/* Wishlist Icon */}
+                <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition">
+                  <FaHeart size={18} />
+                </button>
+
                 {/* Image */}
-                <div className="h-48 flex justify-center items-center">
+                <div className="h-48 flex justify-center items-center p-4">
                   <img
                     src={image}
                     alt={title}
-                    className="h-full object-contain"
+                    className="max-h-full object-contain"
                   />
                 </div>
 
-                {/* Price + Title */}
-                <div className="px-3">
-                  <p className="bg-white text-blue-700 font-bold text-base rounded-r-md px-3 py-1 w-fit">
+                {/* Content */}
+                <div className="flex flex-col flex-1">
+                  {/* Price + Title */}
+                  <p className="bg-blue-600 text-white font-bold text-base rounded-r-md px-3 py-2 w-fit">
                     ₹ {price}
                   </p>
-                  <h4 className="text-gray-800 font-bold text-lg mt-2">
+                  <h4 className="text-blue-600 font-bold text-lg mt-2 line-clamp-2 px-2">
                     {title}
                   </h4>
-                </div>
 
-                {/* Reviews */}
-                <div className="flex items-center gap-2 px-3 mt-1 mb-2">
-                  <StarRate rating={rating} />
-                  <span className="text-gray-600 text-sm">
-                    ({formatCount(reviewCount || 0)} reviews)
-                  </span>
+                  {/* Reviews */}
+                  <div className="flex items-center gap-2 mt-2 px-2">
+                    <div className="flex items-center">
+                      <StarRate rating={rating} />
+                    </div>
+                    <span className="text-blue-600 text-sm font-semibold whitespace-nowrap">
+                      ({formatCount(reviewCount || 0)} reviews)
+                    </span>
+                  </div>
+
+                  {/* Spacer pushes button down */}
+                  <div className="flex-grow p-2"></div>
                 </div>
 
                 {/* Add to Cart */}

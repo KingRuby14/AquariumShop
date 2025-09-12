@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import Header from '../Components/Header.jsx'
 import Hero from '../Components/Home/Hero.jsx'
-import PromiseDelivery from '../Components/Home/Promise.jsx'
 import CategorySection from '../Components/Home/Category.jsx';
 import BannerSection from '../Components/Home/BannerSection.jsx';
-import Product from './Product.jsx'
+import Products from '../Components/Home/Products.jsx'
 import { CartProvider } from '../Constant/AddToCart.jsx'
 import AdvertisementFish from '../Components/Home/Advertisement/AdvertisementFish';
 import Fish from '../Components/Home/BestSelling/Fish.jsx';
@@ -28,10 +27,9 @@ export default function Home() {
       <div>
         <Header query={query} setQuery={setQuery} />
         <Hero />
-        <PromiseDelivery />
         <CategorySection />
         <BannerSection />
-        <Product />
+        <Products />
         <AdvertisementFish />
         <Fish />
         <AdvertisementHunt />

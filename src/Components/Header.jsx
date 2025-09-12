@@ -8,7 +8,10 @@ import { Link, useLocation } from "react-router-dom";
 import TopHeader from "./Home/TopHeader.jsx";
 import { FiShoppingBag } from "react-icons/fi";
 import { RiHeartAddLine } from "react-icons/ri";
-import { IoLogIn, IoClose } from "react-icons/io5";
+import { IoLogIn } from "react-icons/io5";
+import AddToCartSidebar from "../Constant/AddToCartSidebar.jsx";
+import WishlistSidebar from "../Constant/WishlistSidebar.jsx";
+import { useWishlist } from "../Constant/Wishlist.jsx";
 
 export default function Header({ setQuery }) {
   // main UI state
@@ -19,9 +22,7 @@ export default function Header({ setQuery }) {
   // refs
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
-  const cartRef = useRef(null);
   const cartButtonRef = useRef(null);
-  const wishlistRef = useRef(null);
   const wishlistButtonRef = useRef(null);
   const searchDesktopRef = useRef(null);
   const searchMobileRef = useRef(null);
@@ -34,6 +35,9 @@ export default function Header({ setQuery }) {
   const [inputValue, setInputValue] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+
+  const wishlistContext = useWishlist() || {};
+  const wishlistItems = wishlistContext.wishlistItems ?? [];
 
   // toggle helpers
   const toggleMenu = () => {
@@ -80,16 +84,19 @@ export default function Header({ setQuery }) {
     const onDocClick = (e) => {
       const t = e.target;
 
-      if (menuOpen && !(menuRef.current?.contains(t) || menuButtonRef.current?.contains(t))) {
+      if (
+        menuOpen &&
+        !(menuRef.current?.contains(t) || menuButtonRef.current?.contains(t))
+      ) {
         setMenuOpen(false);
       }
-      if (cartOpen && !(cartRef.current?.contains(t) || cartButtonRef.current?.contains(t))) {
-        setCartOpen(false);
-      }
-      if (wishlistOpen && !(wishlistRef.current?.contains(t) || wishlistButtonRef.current?.contains(t))) {
-        setWishlistOpen(false);
-      }
-      if (showResults && !(searchDesktopRef.current?.contains(t) || searchMobileRef.current?.contains(t))) {
+      if (
+        showResults &&
+        !(
+          searchDesktopRef.current?.contains(t) ||
+          searchMobileRef.current?.contains(t)
+        )
+      ) {
         setShowResults(false);
       }
     };
@@ -118,7 +125,11 @@ export default function Header({ setQuery }) {
       {/* header */}
       <header
         className={`fixed w-full top-0 z-50 flex items-center justify-between px-3 md:px-8 lg:px-16 transition-all duration-300
-        ${scrolled ? "bg-transparent shadow-md py-2 md:py-2.5" : "bg-transparent py-3 md:py-4"}`}
+        ${
+          scrolled
+            ? "bg-transparent shadow-md py-2 md:py-2.5"
+            : "bg-transparent py-3 md:py-4"
+        }`}
       >
         {/* Logo */}
         <div className="flex items-center">
@@ -126,7 +137,10 @@ export default function Header({ setQuery }) {
         </div>
 
         {/* Mobile search */}
-        <div ref={searchMobileRef} className="relative flex md:hidden items-center flex-1 mx-3">
+        <div
+          ref={searchMobileRef}
+          className="relative flex md:hidden items-center flex-1 mx-3"
+        >
           <input
             type="search"
             placeholder="Search..."
@@ -153,7 +167,11 @@ export default function Header({ setQuery }) {
                     setShowResults(false);
                   }}
                 >
-                  <img src={item.image} alt={item.title} className="w-10 h-10 object-cover rounded-lg" />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-10 h-10 object-cover rounded-lg"
+                  />
                   <span className="font-medium text-sm">{item.title}</span>
                 </div>
               ))}
@@ -180,7 +198,7 @@ export default function Header({ setQuery }) {
             <Link
               key={item}
               to={item === "Home" ? "/" : `/${item}`}
-              className="font-semibold md:text-sm lg:text-lg xl:text-xl hover:text-orange-500"
+              className="font-semibold md:text-sm lg:text-lg xl:text-xl text-black"
             >
               {item}
             </Link>
@@ -188,7 +206,10 @@ export default function Header({ setQuery }) {
         </nav>
 
         {/* desktop search */}
-        <div ref={searchDesktopRef} className="hidden md:flex relative items-center ml-4">
+        <div
+          ref={searchDesktopRef}
+          className="hidden md:flex relative items-center ml-4"
+        >
           <input
             type="search"
             placeholder="Search Products"
@@ -199,8 +220,11 @@ export default function Header({ setQuery }) {
             }}
             onFocus={() => inputValue && setShowResults(true)}
             className={`w-40 sm:w-56 lg:w-72 h-9 rounded-full px-3 border outline-none transition-all
-              ${scrolled ? "bg-blue-600 text-white placeholder-white border-white"
-                         : "bg-white text-black border-gray-400"}`}
+              ${
+                scrolled
+                  ? "bg-blue-600 text-white placeholder-white border-white"
+                  : "bg-white text-black border-gray-400"
+              }`}
           />
           <button className="absolute right-0 bg-orange-500 w-9 h-9 rounded-full flex items-center justify-center">
             <img src={searchIcon} alt="Search" className="w-5" />
@@ -217,7 +241,11 @@ export default function Header({ setQuery }) {
                     setShowResults(false);
                   }}
                 >
-                  <img src={item.image} alt={item.title} className="w-10 h-10 object-cover rounded-lg" />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-10 h-10 object-cover rounded-lg"
+                  />
                   <span className="font-medium text-sm">{item.title}</span>
                 </div>
               ))}
@@ -227,33 +255,42 @@ export default function Header({ setQuery }) {
 
         {/* desktop icons */}
         <div
-          className={`hidden md:flex items-center gap-6 text-2xl transition-colors
-            ${scrolled ? "text-white lg:text-white md:text-white" : "text-white"}`}
+          className={`hidden md:flex items-center gap-6 text-2xl transition-colors 
+            ${scrolled ? "text-white" : "text-white"}`}
         >
           <button
             ref={wishlistButtonRef}
             onClick={toggleWishlist}
             aria-expanded={wishlistOpen}
-            className="cursor-pointer hover:text-red-600"
+            className="relative cursor-pointer bg-orange-500 rounded-full p-3"
             title="Wishlist"
           >
-            <RiHeartAddLine />
+            <RiHeartAddLine className="hover:text-red-600 text-white z-99" />
+            {wishlistItems.length > 0 && (
+              <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+                {wishlistItems.length}
+              </span>
+            )}
           </button>
 
           <button
             ref={cartButtonRef}
             onClick={toggleCart}
             aria-expanded={cartOpen}
-            className="relative cursor-pointer"
+            className="relative cursor-pointer bg-orange-500 rounded-full p-3"
             title="Cart"
           >
             <FiShoppingBag className="hover:text-red-600" />
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+            <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
               {cartItems.length}
             </span>
           </button>
-
-          <IoLogIn className="cursor-pointer hover:text-red-600" />
+          <button
+            className="cursor-pointer hover:text-red-600 bg-orange-500 rounded-full p-3 "
+            title="Login"
+          >
+            <IoLogIn className="hover:text-red-600 text-white z-99" />
+          </button>
         </div>
       </header>
 
@@ -276,13 +313,6 @@ export default function Header({ setQuery }) {
         className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 z-50
           ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <button
-          className="absolute top-4 right-4 text-2xl text-blue-600"
-          onClick={toggleMenu}
-          aria-label="Close menu"
-        >
-          <IoClose />
-        </button>
         <div className="flex flex-col items-start gap-6 mt-16 px-6 text-lg font-semibold text-blue-700">
           {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
             <Link
@@ -298,64 +328,28 @@ export default function Header({ setQuery }) {
       </div>
 
       {/* Cart Sidebar */}
-      <div
-        ref={cartRef}
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50
-          ${cartOpen ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <button
-          className="absolute top-4 right-4 text-2xl text-blue-600"
-          onClick={toggleCart}
-          aria-label="Close cart"
-        >
-          <IoClose />
-        </button>
-        <h2 className="text-xl font-bold p-6 border-b">My Cart</h2>
-        <div className="p-4 overflow-y-auto h-full">
-          {cartItems.length === 0 ? (
-            <p className="text-gray-500">Your cart is empty</p>
-          ) : (
-            cartItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 border-b py-3">
-                <img src={item.image} alt={item.title} className="w-14 h-14 rounded-lg object-cover" />
-                <div className="flex-1">
-                  <p className="font-semibold">{item.title}</p>
-                  <p className="text-sm text-gray-500">₹ {item.price}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <AddToCartSidebar cartOpen={cartOpen} toggleCart={toggleCart} />
 
       {/* Wishlist Sidebar */}
-      <div
-        ref={wishlistRef}
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50
-          ${wishlistOpen ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <button
-          className="absolute top-4 right-4 text-2xl text-blue-600"
-          onClick={toggleWishlist}
-          aria-label="Close wishlist"
-        >
-          <IoClose />
-        </button>
-        <h2 className="text-xl font-bold p-6 border-b">My Wishlist</h2>
-        <div className="p-4">
-          <p className="text-gray-500">Your wishlist is empty</p>
-        </div>
-      </div>
+      <WishlistSidebar
+        wishlistOpen={wishlistOpen}
+        toggleWishlist={toggleWishlist}
+      />
 
       {/* Mobile bottom nav */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md flex justify-around items-center py-3 md:hidden">
         <button
-          className="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
+          className="relative w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
           onClick={toggleWishlist}
           ref={wishlistButtonRef}
           aria-label="Open wishlist"
         >
           <RiHeartAddLine className="h-7 w-7" />
+          {wishlistItems.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+              {wishlistItems.length}
+            </span>
+          )}
         </button>
 
         <button

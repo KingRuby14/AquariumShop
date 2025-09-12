@@ -21,7 +21,7 @@ export default function Hero() {
         </span>
 
         <h1 className="font-extrabold text-white leading-tight mt-4 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl">
-          Freshwater <br />
+          Fresh Water <br />
           Fish
           <small className="block mt-3 text-base sm:text-lg lg:text-xl font-medium text-cyan-100 normal-case">
             Safe Delivery <br /> Happy Aqua’s

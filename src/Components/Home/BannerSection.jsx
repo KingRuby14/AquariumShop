@@ -43,17 +43,18 @@ const banners = [
 export default function BannerSection() {
   return (
     <section className="w-full bg-[#f6f8fb] py-10 md:py-16">
-      <div className="max-w-6xl mx-auto px-4">
-        <h3 className="text-lg md:text-xl font-semibold underline uppercase mb-8 md:mb-12">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Title */}
+        <h3 className="text-lg md:text-xl font-bold underline uppercase mb-8 md:mb-12 text-left xl:text-2xl text-blue-600">
           Offers On:
         </h3>
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 place-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {banners.map(({ id, title, discount, sub, img, gradient }) => (
             <div
               key={id}
-              className={`${gradient} w-[280px] sm:w-[300px] md:w-[320px] lg:w-[290px] xl:w-[350px] h-auto sm:h-[230px] rounded-2xl shadow-md flex items-center justify-between p-4`}
+              className={`${gradient} w-full h-auto rounded-2xl shadow-md flex items-center justify-between p-4`}
             >
               {/* Text Section */}
               <div className="flex flex-col items-center text-center gap-2 flex-1">
