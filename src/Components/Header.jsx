@@ -1,199 +1,377 @@
+// Header.jsx
 import React, { useEffect, useState, useRef } from "react";
 import logo from "../assets/AQualogo.png";
 import searchIcon from "../assets/search.png";
-import Wishlist from "../assets/wishlist.png";
-import Cart from "../assets/fish.png";
-import Login from "../assets/login.png";
-import { useCart } from '../Constant/AddToCart.jsx'
-import data from '../Data/ProductsData.jsx'
+import { useCart } from "../Constant/AddToCart.jsx";
+import data from "../Data/ProductsData.jsx";
 import { Link, useLocation } from "react-router-dom";
 import TopHeader from "./Home/TopHeader.jsx";
+import { FiShoppingBag } from "react-icons/fi";
+import { RiHeartAddLine } from "react-icons/ri";
+import { IoLogIn, IoClose } from "react-icons/io5";
 
 export default function Header({ setQuery }) {
+  // main UI state
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+
+  // refs
   const menuRef = useRef(null);
-
-  const toggleMenu = () => setMenuOpen((prev) => !prev);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close dropdown on scroll
-  useEffect(() => {
-    const handleScroll = () => setMenuOpen(false);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const menuButtonRef = useRef(null);
+  const cartRef = useRef(null);
+  const cartButtonRef = useRef(null);
+  const wishlistRef = useRef(null);
+  const wishlistButtonRef = useRef(null);
+  const searchDesktopRef = useRef(null);
+  const searchMobileRef = useRef(null);
 
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const cartContext = useCart() || {};
+  const cartItems = cartContext.cartItems ?? [];
+
   const [scrolled, setScrolled] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
-  const { cartItems } = useCart();
+  const [showResults, setShowResults] = useState(false);
 
+  // toggle helpers
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+    setCartOpen(false);
+    setWishlistOpen(false);
+  };
+  const toggleCart = () => {
+    setCartOpen((prev) => !prev);
+    setMenuOpen(false);
+    setWishlistOpen(false);
+  };
+  const toggleWishlist = () => {
+    setWishlistOpen((prev) => !prev);
+    setMenuOpen(false);
+    setCartOpen(false);
+  };
+
+  // Debounced search
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const id = setTimeout(() => {
+      if (!inputValue.trim()) {
+        setFilteredResults([]);
+        setShowResults(false);
+      } else {
+        const q = inputValue.toLowerCase();
+        const results = data.filter((it) => it.title.toLowerCase().includes(q));
+        setFilteredResults(results);
+        setShowResults(true);
+      }
+    }, 250);
+    return () => clearTimeout(id);
+  }, [inputValue]);
+
+  // scroll effects
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Search filter
+  // Document-level click
   useEffect(() => {
-    if (inputValue.trim() === "") {
-      setFilteredResults([]);
-    } else {
-      const results = data.filter((item) =>
-        item.title.toLowerCase().includes(inputValue.toLowerCase())
-      );
-      setFilteredResults(results);
-    }
-  }, [inputValue]);
+    const onDocClick = (e) => {
+      const t = e.target;
+
+      if (menuOpen && !(menuRef.current?.contains(t) || menuButtonRef.current?.contains(t))) {
+        setMenuOpen(false);
+      }
+      if (cartOpen && !(cartRef.current?.contains(t) || cartButtonRef.current?.contains(t))) {
+        setCartOpen(false);
+      }
+      if (wishlistOpen && !(wishlistRef.current?.contains(t) || wishlistButtonRef.current?.contains(t))) {
+        setWishlistOpen(false);
+      }
+      if (showResults && !(searchDesktopRef.current?.contains(t) || searchMobileRef.current?.contains(t))) {
+        setShowResults(false);
+      }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setCartOpen(false);
+        setWishlistOpen(false);
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen, cartOpen, wishlistOpen, showResults]);
 
   return (
     <div>
-      {/* Show TopHeader only if not homepage */}
       {location.pathname !== "/" && <TopHeader />}
 
+      {/* header */}
       <header
-        className={`fixed w-full top-0 z-50 flex items-center justify-between px-4 md:px-8 lg:px-16 py-3 transition-all duration-300 ${
-          scrolled ? "bg-white shadow-md" : "bg-transparent"
-        }`}
+        className={`fixed w-full top-0 z-50 flex items-center justify-between px-3 md:px-8 lg:px-16 transition-all duration-300
+        ${scrolled ? "bg-transparent shadow-md py-2 md:py-2.5" : "bg-transparent py-3 md:py-4"}`}
       >
         {/* Logo */}
         <div className="flex items-center">
-          <img src={logo} alt="Logo" className="w-28 md:w-32" />
+          <img src={logo} alt="Logo" className="w-20 md:w-28 lg:w-32" />
         </div>
 
-        {/* Hamburger Button (Mobile) */}
-        <div
-          className="flex flex-col gap-1.5 cursor-pointer md:hidden"
-          onClick={toggleMenu}
-        >
-          <span className="w-6 h-0.5 bg-black"></span>
-          <span className="w-6 h-0.5 bg-black"></span>
-          <span className="w-6 h-0.5 bg-black"></span>
-        </div>
-
-        {/* Navigation Links */}
-        <nav
-          ref={menuRef}
-          className={`${
-            menuOpen
-              ? "flex flex-col absolute top-14 right-4 bg-black text-white rounded-lg shadow-lg p-4 space-y-3"
-              : "hidden"
-          } md:flex md:flex-row md:static md:bg-transparent md:shadow-none md:space-x-6 md:p-0`}
-        >
-          <Link
-            to="/"
-            className="font-semibold hover:text-orange-500"
-            onClick={() => setMenuOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/Shop"
-            className="font-semibold hover:text-orange-500"
-            onClick={() => setMenuOpen(false)}
-          >
-            Shop
-          </Link>
-          <Link
-            to="/About"
-            className="font-semibold hover:text-orange-500"
-            onClick={() => setMenuOpen(false)}
-          >
-            About
-          </Link>
-          <Link
-            to="/Track"
-            className="font-semibold hover:text-orange-500"
-            onClick={() => setMenuOpen(false)}
-          >
-            Track
-          </Link>
-          <Link
-            to="/Contact"
-            className="font-semibold hover:text-orange-500"
-            onClick={() => setMenuOpen(false)}
-          >
-            Contact
-          </Link>
-        </nav>
-
-        {/* Search Box */}
-        <div className="hidden md:flex relative items-center">
+        {/* Mobile search */}
+        <div ref={searchMobileRef} className="relative flex md:hidden items-center flex-1 mx-3">
           <input
             type="search"
-            placeholder="Search Products"
+            placeholder="Search..."
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
-              setQuery(e.target.value);
+              setQuery?.(e.target.value);
             }}
-            className={`w-64 lg:w-72 h-9 rounded-full px-3 border outline-none transition-all ${
-              scrolled
-                ? "bg-black text-white placeholder-white border-black"
-                : "bg-white text-black border-gray-400"
-            }`}
+            onFocus={() => inputValue && setShowResults(true)}
+            className="w-full h-8 rounded-full text-black px-3 border border-gray-300 outline-none text-sm"
           />
-          <button className="absolute right-0 bg-orange-500 w-10 h-9 rounded-full flex items-center justify-center">
-            <img src={searchIcon} alt="Search" className="w-5" />
+          <button className="absolute right-0 top-0 bg-orange-500 w-8 h-8 rounded-full flex items-center justify-center">
+            <img src={searchIcon} alt="Search" className="w-6" />
           </button>
 
-          {/* Search Dropdown */}
-          {filteredResults.length > 0 && (
-            <div className="absolute top-12 left-0 right-0 bg-black text-white rounded-md max-h-48 overflow-y-auto shadow-lg z-50">
+          {showResults && filteredResults.length > 0 && (
+            <div className="absolute top-10 left-0 w-full bg-white text-black rounded-xl max-h-64 overflow-y-auto shadow-lg border z-50">
               {filteredResults.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-200 hover:text-black"
-                  onClick={() => alert(`Selected: ${item.title}`)}
+                  className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    alert(`Selected: ${item.title}`);
+                    setShowResults(false);
+                  }}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-10 h-10 object-cover rounded"
-                  />
-                  <span>{item.title}</span>
+                  <img src={item.image} alt={item.title} className="w-10 h-10 object-cover rounded-lg" />
+                  <span className="font-medium text-sm">{item.title}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* User Icons */}
-        <div className="flex items-center gap-4 ml-4">
-          <a href="#">
-            <img
-              src={Wishlist}
-              alt="wishlist"
-              className="w-8 md:w-10 rounded-full bg-white p-1"
-            />
-          </a>
-          <a href="#" className="relative">
-            <img src={Cart} alt="cart" className="w-8 md:w-10" />
+        {/* Hamburger */}
+        <button
+          ref={menuButtonRef}
+          onClick={toggleMenu}
+          aria-expanded={menuOpen}
+          aria-label="Open menu"
+          className="flex flex-col gap-1.5 bg-blue-600 p-2 rounded-md cursor-pointer md:hidden"
+        >
+          <span className="w-6 h-0.5 bg-white" />
+          <span className="w-6 h-0.5 bg-white" />
+          <span className="w-6 h-0.5 bg-white" />
+        </button>
+
+        {/* desktop nav */}
+        <nav className="hidden md:flex md:flex-row md:space-x-6">
+          {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
+            <Link
+              key={item}
+              to={item === "Home" ? "/" : `/${item}`}
+              className="font-semibold md:text-sm lg:text-lg xl:text-xl hover:text-orange-500"
+            >
+              {item}
+            </Link>
+          ))}
+        </nav>
+
+        {/* desktop search */}
+        <div ref={searchDesktopRef} className="hidden md:flex relative items-center ml-4">
+          <input
+            type="search"
+            placeholder="Search Products"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setQuery?.(e.target.value);
+            }}
+            onFocus={() => inputValue && setShowResults(true)}
+            className={`w-40 sm:w-56 lg:w-72 h-9 rounded-full px-3 border outline-none transition-all
+              ${scrolled ? "bg-blue-600 text-white placeholder-white border-white"
+                         : "bg-white text-black border-gray-400"}`}
+          />
+          <button className="absolute right-0 bg-orange-500 w-9 h-9 rounded-full flex items-center justify-center">
+            <img src={searchIcon} alt="Search" className="w-5" />
+          </button>
+
+          {showResults && filteredResults.length > 0 && (
+            <div className="absolute top-12 left-0 w-full bg-white text-black rounded-xl max-h-64 overflow-y-auto shadow-lg border z-50">
+              {filteredResults.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    alert(`Selected: ${item.title}`);
+                    setShowResults(false);
+                  }}
+                >
+                  <img src={item.image} alt={item.title} className="w-10 h-10 object-cover rounded-lg" />
+                  <span className="font-medium text-sm">{item.title}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* desktop icons */}
+        <div
+          className={`hidden md:flex items-center gap-6 text-2xl transition-colors
+            ${scrolled ? "text-white lg:text-white md:text-white" : "text-white"}`}
+        >
+          <button
+            ref={wishlistButtonRef}
+            onClick={toggleWishlist}
+            aria-expanded={wishlistOpen}
+            className="cursor-pointer hover:text-red-600"
+            title="Wishlist"
+          >
+            <RiHeartAddLine />
+          </button>
+
+          <button
+            ref={cartButtonRef}
+            onClick={toggleCart}
+            aria-expanded={cartOpen}
+            className="relative cursor-pointer"
+            title="Cart"
+          >
+            <FiShoppingBag className="hover:text-red-600" />
             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
               {cartItems.length}
             </span>
-          </a>
-          <a href="#">
-            <img
-              src={Login}
-              alt="login"
-              className="w-8 md:w-10 rounded-full bg-white p-1"
-            />
-          </a>
+          </button>
+
+          <IoLogIn className="cursor-pointer hover:text-red-600" />
         </div>
       </header>
+
+      {/* overlay */}
+      {(menuOpen || cartOpen || wishlistOpen) && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => {
+            setMenuOpen(false);
+            setCartOpen(false);
+            setWishlistOpen(false);
+            setShowResults(false);
+          }}
+        />
+      )}
+
+      {/* mobile menu */}
+      <div
+        ref={menuRef}
+        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 z-50
+          ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <button
+          className="absolute top-4 right-4 text-2xl text-blue-600"
+          onClick={toggleMenu}
+          aria-label="Close menu"
+        >
+          <IoClose />
+        </button>
+        <div className="flex flex-col items-start gap-6 mt-16 px-6 text-lg font-semibold text-blue-700">
+          {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
+            <Link
+              key={item}
+              to={item === "Home" ? "/" : `/${item}`}
+              className="hover:text-black"
+              onClick={() => setMenuOpen(false)}
+            >
+              {item}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Cart Sidebar */}
+      <div
+        ref={cartRef}
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50
+          ${cartOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <button
+          className="absolute top-4 right-4 text-2xl text-blue-600"
+          onClick={toggleCart}
+          aria-label="Close cart"
+        >
+          <IoClose />
+        </button>
+        <h2 className="text-xl font-bold p-6 border-b">My Cart</h2>
+        <div className="p-4 overflow-y-auto h-full">
+          {cartItems.length === 0 ? (
+            <p className="text-gray-500">Your cart is empty</p>
+          ) : (
+            cartItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-3 border-b py-3">
+                <img src={item.image} alt={item.title} className="w-14 h-14 rounded-lg object-cover" />
+                <div className="flex-1">
+                  <p className="font-semibold">{item.title}</p>
+                  <p className="text-sm text-gray-500">₹ {item.price}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Wishlist Sidebar */}
+      <div
+        ref={wishlistRef}
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50
+          ${wishlistOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <button
+          className="absolute top-4 right-4 text-2xl text-blue-600"
+          onClick={toggleWishlist}
+          aria-label="Close wishlist"
+        >
+          <IoClose />
+        </button>
+        <h2 className="text-xl font-bold p-6 border-b">My Wishlist</h2>
+        <div className="p-4">
+          <p className="text-gray-500">Your wishlist is empty</p>
+        </div>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md flex justify-around items-center py-3 md:hidden">
+        <button
+          className="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
+          onClick={toggleWishlist}
+          ref={wishlistButtonRef}
+          aria-label="Open wishlist"
+        >
+          <RiHeartAddLine className="h-7 w-7" />
+        </button>
+
+        <button
+          className="relative w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
+          onClick={toggleCart}
+          ref={cartButtonRef}
+          aria-label="Open cart"
+        >
+          <FiShoppingBag className="h-7 w-7" />
+          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+            {cartItems.length}
+          </span>
+        </button>
+
+        <IoLogIn className="w-7 h-7 cursor-pointer text-blue-600 hover:text-red-600" />
+      </div>
     </div>
   );
 }
