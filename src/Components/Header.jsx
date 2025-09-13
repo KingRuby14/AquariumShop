@@ -194,7 +194,7 @@ export default function Header({ setQuery }) {
 
         {/* desktop nav */}
         <nav className="hidden md:flex md:flex-row md:space-x-6">
-          {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
+          {["Home", "Shop", "Order Tracking"].map((item) => (
             <Link
               key={item}
               to={item === "Home" ? "/" : `/${item}`}
@@ -327,7 +327,7 @@ export default function Header({ setQuery }) {
         </button>
 
         <div className="flex flex-col items-start gap-6 mt-16 px-6 text-lg font-semibold text-blue-700">
-          {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
+          {["Home", "Shop", "Order Tracking"].map((item) => (
             <Link
               key={item}
               to={item === "Home" ? "/" : `/${item}`}
