@@ -8,18 +8,18 @@ import { Link, useLocation } from "react-router-dom";
 import TopHeader from "./Home/TopHeader.jsx";
 import { FiShoppingBag } from "react-icons/fi";
 import { RiHeartAddLine } from "react-icons/ri";
-import { IoLogIn } from "react-icons/io5";
+import { IoPersonCircle } from "react-icons/io5";
+import { AiFillHome } from "react-icons/ai";
+import { FaTimes } from "react-icons/fa"; // close button icon
 import AddToCartSidebar from "../Constant/AddToCartSidebar.jsx";
 import WishlistSidebar from "../Constant/WishlistSidebar.jsx";
 import { useWishlist } from "../Constant/Wishlist.jsx";
 
 export default function Header({ setQuery }) {
-  // main UI state
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
-  // refs
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const cartButtonRef = useRef(null);
@@ -31,13 +31,13 @@ export default function Header({ setQuery }) {
   const cartContext = useCart() || {};
   const cartItems = cartContext.cartItems ?? [];
 
+  const wishlistContext = useWishlist() || {};
+  const wishlistItems = wishlistContext.wishlistItems ?? [];
+
   const [scrolled, setScrolled] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
-
-  const wishlistContext = useWishlist() || {};
-  const wishlistItems = wishlistContext.wishlistItems ?? [];
 
   // toggle helpers
   const toggleMenu = () => {
@@ -79,7 +79,7 @@ export default function Header({ setQuery }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Document-level click
+  // Document-level click + escape
   useEffect(() => {
     const onDocClick = (e) => {
       const t = e.target;
@@ -127,7 +127,7 @@ export default function Header({ setQuery }) {
         className={`fixed w-full top-0 z-50 flex items-center justify-between px-3 md:px-8 lg:px-16 transition-all duration-300
         ${
           scrolled
-            ? "bg-transparent shadow-md py-2 md:py-2.5"
+            ? "bg-white shadow-md py-2 md:py-2.5"
             : "bg-transparent py-3 md:py-4"
         }`}
       >
@@ -152,8 +152,8 @@ export default function Header({ setQuery }) {
             onFocus={() => inputValue && setShowResults(true)}
             className="w-full h-8 rounded-full text-black px-3 border border-gray-300 outline-none text-sm"
           />
-          <button className="absolute right-0 top-0 bg-orange-500 w-8 h-8 rounded-full flex items-center justify-center">
-            <img src={searchIcon} alt="Search" className="w-6" />
+          <button className="absolute right-0.5 bg-blue-500 w-8 h-7  rounded-full flex items-center justify-center">
+            <img src={searchIcon} alt="Search" className="w-7" />
           </button>
 
           {showResults && filteredResults.length > 0 && (
@@ -198,7 +198,12 @@ export default function Header({ setQuery }) {
             <Link
               key={item}
               to={item === "Home" ? "/" : `/${item}`}
-              className="font-semibold md:text-sm lg:text-lg xl:text-xl text-black"
+              className={`font-semibold md:text-sm lg:text-lg xl:text-xl transition-colors duration-300
+                ${
+                  scrolled
+                    ? "text-blue-700 hover:text-orange-500"
+                    : "text-white hover:text-blue-500"
+                }`}
             >
               {item}
             </Link>
@@ -226,8 +231,8 @@ export default function Header({ setQuery }) {
                   : "bg-white text-black border-gray-400"
               }`}
           />
-          <button className="absolute right-0 bg-orange-500 w-9 h-9 rounded-full flex items-center justify-center">
-            <img src={searchIcon} alt="Search" className="w-5" />
+          <button className="absolute right-0.5 bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center">
+            <img src={searchIcon} alt="Search" className="w-7  text-white" />
           </button>
 
           {showResults && filteredResults.length > 0 && (
@@ -262,7 +267,7 @@ export default function Header({ setQuery }) {
             ref={wishlistButtonRef}
             onClick={toggleWishlist}
             aria-expanded={wishlistOpen}
-            className="relative cursor-pointer bg-orange-500 rounded-full p-3"
+            className="relative cursor-pointer bg-blue-500 rounded-full p-2.5 border-white border-2"
             title="Wishlist"
           >
             <RiHeartAddLine className="hover:text-red-600 text-white z-99" />
@@ -277,7 +282,7 @@ export default function Header({ setQuery }) {
             ref={cartButtonRef}
             onClick={toggleCart}
             aria-expanded={cartOpen}
-            className="relative cursor-pointer bg-orange-500 rounded-full p-3"
+            className="relative cursor-pointer bg-blue-500 rounded-full p-2.5 border-white border-2"
             title="Cart"
           >
             <FiShoppingBag className="hover:text-red-600" />
@@ -286,10 +291,10 @@ export default function Header({ setQuery }) {
             </span>
           </button>
           <button
-            className="cursor-pointer hover:text-red-600 bg-orange-500 rounded-full p-3 "
-            title="Login"
+            className="cursor-pointer hover:text-red-600 bg-blue-500 rounded-full p-2.5 border-white border-2"
+            title="Account"
           >
-            <IoLogIn className="hover:text-red-600 text-white z-99" />
+            <IoPersonCircle className="hover:text-red-600 text-white z-99" />
           </button>
         </div>
       </header>
@@ -307,12 +312,20 @@ export default function Header({ setQuery }) {
         />
       )}
 
-      {/* mobile menu */}
+      {/* Mobile menu */}
       <div
         ref={menuRef}
         className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 z-50
           ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
+        {/* Close button */}
+        <button
+          className="absolute top-5 right-5 text-2xl text-blue-700"
+          onClick={() => setMenuOpen(false)}
+        >
+          <FaTimes />
+        </button>
+
         <div className="flex flex-col items-start gap-6 mt-16 px-6 text-lg font-semibold text-blue-700">
           {["Home", "Shop", "About", "Track", "Contact"].map((item) => (
             <Link
@@ -338,33 +351,48 @@ export default function Header({ setQuery }) {
 
       {/* Mobile bottom nav */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md flex justify-around items-center py-3 md:hidden">
+        <Link
+          to="/"
+          className="flex flex-col items-center text-blue-600 hover:text-red-600"
+        >
+          <AiFillHome className="w-7 h-7" />
+          <span className="text-xs font-semibold">Home</span>
+        </Link>
+
         <button
-          className="relative w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
+          className="relative flex flex-col items-center text-blue-600 hover:text-red-600"
           onClick={toggleWishlist}
           ref={wishlistButtonRef}
           aria-label="Open wishlist"
         >
-          <RiHeartAddLine className="h-7 w-7" />
+          <RiHeartAddLine className="w-7 h-7" />
           {wishlistItems.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+            <span className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
               {wishlistItems.length}
             </span>
           )}
+          <span className="text-xs font-semibold">Wishlist</span>
         </button>
 
         <button
-          className="relative w-8 h-8 flex items-center justify-center text-blue-600 hover:text-red-600"
+          className="relative flex flex-col items-center text-blue-600 hover:text-red-600"
           onClick={toggleCart}
           ref={cartButtonRef}
           aria-label="Open cart"
         >
-          <FiShoppingBag className="h-7 w-7" />
-          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
-            {cartItems.length}
-          </span>
+          <FiShoppingBag className="w-7 h-7" />
+          {cartItems.length > 0 && (
+            <span className="absolute top-0 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">
+              {cartItems.length}
+            </span>
+          )}
+          <span className="text-xs font-semibold">Cart</span>
         </button>
 
-        <IoLogIn className="w-7 h-7 cursor-pointer text-blue-600 hover:text-red-600" />
+        <button className="flex flex-col items-center text-blue-600 hover:text-red-600">
+          <IoPersonCircle className="w-7 h-7" />
+          <span className="text-xs font-semibold">Account</span>
+        </button>
       </div>
     </div>
   );

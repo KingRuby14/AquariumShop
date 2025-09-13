@@ -2,11 +2,17 @@ import React, { useState } from "react";
 import data from "../../Data/ProductsData.jsx";
 import StarRate from "../../Constant/Stars.jsx";
 import { useCart } from "../../Constant/AddToCart.jsx";
+import { useWishlist } from "../../Constant/Wishlist.jsx";
 import { FaHeart } from "react-icons/fa";
+import { FiShoppingCart } from "react-icons/fi";
 
 export default function Products() {
   const { addToCart } = useCart();
+  const { addToWishlist } = useWishlist();
+
   const [activeCategory, setActiveCategory] = useState("All Items");
+  const [popupMessage, setPopupMessage] = useState("");
+
   const categories = ["All Items", "Sales", "Featured", "Best Seller"];
 
   // Filter by category
@@ -22,8 +28,22 @@ export default function Products() {
     return count;
   }
 
+  // Show popup for 2 seconds
+  const showPopup = (msg) => {
+    setPopupMessage(msg);
+    setTimeout(() => setPopupMessage(""), 2000);
+  };
+
   return (
-    <section className="w-full min-h-screen bg-gradient-to-r from-cyan-400 to-blue-600 py-12 px-4 md:px-10">
+    <section className="w-full min-h-screen bg-gradient-to-r from-cyan-400 to-blue-600 py-12 px-4 md:px-10 relative">
+      {/* Popup message */}
+      {popupMessage && (
+  <div className="fixed top-20 right-5 transform -translate-x-3.5 bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg z-50 animate-fade-in-out">
+    {popupMessage}
+  </div>
+)}
+
+
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center mb-8">
         <h3 className="text-xl md:text-2xl font-bold text-white underline uppercase mb-4 md:mb-0">
@@ -50,21 +70,16 @@ export default function Products() {
       </div>
 
       {/* Product Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 justify-items-center">
         {categoryFiltered.length === 0 ? (
-          <p className="text-center text-lg text-white">No items found.</p>
+          <p className="text-center text-lg text-blue-500">No items found.</p>
         ) : (
           categoryFiltered.map(
             ({ id, title, image, price, rating, reviewCount }) => (
               <div
                 key={id}
-                className="relative group w-full h-full rounded-xl bg-white shadow-md flex flex-col transition transform hover:scale-105"
+                className="relative group w-3/4 h-full rounded-xl bg-white shadow-md flex flex-col transition transform hover:scale-105"
               >
-                {/* Wishlist Icon */}
-                <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition">
-                  <FaHeart size={18} />
-                </button>
-
                 {/* Image */}
                 <div className="h-48 flex justify-center items-center p-4">
                   <img
@@ -94,17 +109,36 @@ export default function Products() {
                     </span>
                   </div>
 
-                  {/* Spacer pushes button down */}
+                  {/* Spacer pushes icons down */}
                   <div className="flex-grow p-2"></div>
                 </div>
 
-                {/* Add to Cart */}
-                <button
-                  className="w-full h-10 bg-black text-white font-semibold rounded-b-lg opacity-0 group-hover:opacity-100 hover:bg-blue-700 transition"
-                  onClick={() => addToCart({ id, title, image, price })}
-                >
-                  Add to Cart
-                </button>
+                {/* Action Buttons (Cart + Wishlist) */}
+                <div className="flex justify-around items-center w-full border-t p-2">
+                  {/* Add to Cart */}
+                  <button
+                    className="flex items-center gap-2 text-blue-600 font-semibold hover:text-red-600 transition"
+                    onClick={() => {
+                      addToCart({ id, title, image, price });
+                      showPopup("✅ Added to Cart");
+                    }}
+                  >
+                    <FiShoppingCart size={22} />
+                    <span className="hidden sm:inline">Cart</span>
+                  </button>
+
+                  {/* Add to Wishlist */}
+                  <button
+                    className="flex items-center gap-2 text-blue-500 hover:text-red-600 font-semibold transition"
+                    onClick={() => {
+                      addToWishlist({ id, title, image, price });
+                      showPopup("❤️ Added to Wishlist");
+                    }}
+                  >
+                    <FaHeart size={22} />
+                    <span className="hidden sm:inline">Wishlist</span>
+                  </button>
+                </div>
               </div>
             )
           )
